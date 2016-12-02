@@ -6,6 +6,7 @@
 
 enabled_site_setting :translator_enabled
 register_asset "stylesheets/common/post.scss"
+register_asset "stylesheets/common/improve-translation.scss"
 
 after_initialize do
   module ::DiscourseTranslator
@@ -38,6 +39,19 @@ after_initialize do
       rescue ::DiscourseTranslator::TranslatorError => e
         render_json_error e.message, status: 422
       end
+    end
+
+    def improve
+      raise PluginDisabled if !SiteSetting.translator_enabled
+
+      puts params.inspect
+      params.permit(:post_id, :translated_text)
+      post = Post.find(params[:post_id].to_i)
+
+      post.custom_fields[DiscourseTranslator::TRANSLATED_CUSTOM_FIELD] = { I18n.locale => params[:translated_text] }
+      post.save_custom_fields
+
+      render nothing: true, status: 204
     end
   end
 
@@ -105,8 +119,10 @@ after_initialize do
 
   end
 
+  require_dependency "admin_constraint"
   DiscourseTranslator::Engine.routes.draw do
     post "translate" => "translator#translate"
+    post "improve" => "translator#improve", constraints: AdminConstraint.new
   end
 
   Discourse::Application.routes.append do

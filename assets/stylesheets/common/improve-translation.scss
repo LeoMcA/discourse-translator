@@ -1,0 +1,14 @@
+.translator-improve-modal {
+  .original-wrapper {
+    max-height: 200px;
+    overflow: scroll;
+
+    p:first-child {
+      margin-top: 0;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

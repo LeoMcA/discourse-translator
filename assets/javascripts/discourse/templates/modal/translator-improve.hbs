@@ -1,0 +1,14 @@
+{{#d-modal-body title="translator.improve_translation"}}
+  <div class="translator-improve-modal">
+    <div class="original-wrapper">
+      {{{model.post.translated_text}}}
+    </div>
+    {{textarea value=model.translated_text}}
+  </div>
+{{/d-modal-body}}
+
+<div class="modal-footer">
+  {{d-button class="btn-primary"
+             action="edit"
+             label="translator.edit"}}
+</div>

@@ -3,6 +3,7 @@ import { popupAjaxError } from 'discourse/lib/ajax-error';
 import { withPluginApi } from 'discourse/lib/plugin-api';
 import { ajax } from 'discourse/lib/ajax';
 import User from 'discourse/models/user';
+import showModal from 'discourse/lib/show-modal';
 
 function translatePost(post) {
   return ajax('/translator/translate', {
@@ -69,6 +70,23 @@ function initializeTranslation(api) {
 
   api.includePostAttributes('can_translate', 'translated_text', 'detected_lang');
 
+  api.createWidget('improve-translation', {
+    tagName: 'a',
+
+    html () {
+      return I18n.t('translator.improve_translation');
+    },
+
+    click () {
+      var post = this.findAncestorModel();
+      var model = {
+        post: post,
+        translated_text: post.translated_text
+      };
+      showModal('translator-improve', { model });
+    }
+  });
+
   api.decorateWidget('post-menu:before', dec => {
     if (!dec.state.isTranslated) { return; }
 
@@ -81,7 +99,9 @@ function initializeTranslation(api) {
 
     return dec.h('div.post-translation',
                  [dec.h('hr'),
-                  dec.h('div.post-attribution', I18n.t('translator.translated_from', { language, translator })),
+                  dec.h('div.post-attribution',
+                        [I18n.t('translator.translated_from', { language, translator }) + '. ',
+                         dec.attach('improve-translation')]),
                   dec.cooked(dec.attrs.translated_text)]);
   });
 
